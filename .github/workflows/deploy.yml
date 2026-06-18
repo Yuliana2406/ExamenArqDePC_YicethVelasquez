@@ -28,5 +28,25 @@ jobs:
           aws cloudformation deploy \
             --stack-name examen-final-stack \
             --template-file template/ec2.yaml \
-            --capabilities CAPABILITY_NAMED_IAM \
             --region us-east-1
+  
+
+     
+      - name: Wait for deploy
+        run: |
+          aws cloudformation wait stack-create-complete \
+            --stack-name examen-final-stack \
+            --region us-east-1 || \
+          aws cloudformation wait stack-update-complete \
+            --stack-name examen-final-stack \
+            --region us-east-1
+
+    
+      - name: Show Web Server URL
+        run: |
+          IP=$(aws cloudformation describe-stacks \
+            --stack-name examen-final-stack \
+            --region us-east-1 \
+            --query "Stacks[0].Outputs[?OutputKey=='WebServerIP'].OutputValue" \
+            --output text)
+          echo "✅ Servidor disponible en: http://$IP"

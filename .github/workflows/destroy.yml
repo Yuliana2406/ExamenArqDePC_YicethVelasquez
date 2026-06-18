@@ -20,3 +20,11 @@ jobs:
           aws cloudformation delete-stack \
             --stack-name examen-final-stack \
             --region us-east-1
+
+    
+      - name: Wait for deletion
+        run: |
+          aws cloudformation wait stack-delete-complete \
+            --stack-name examen-final-stack \
+            --region us-east-1
+          echo "✅ Stack eliminado correctamente"

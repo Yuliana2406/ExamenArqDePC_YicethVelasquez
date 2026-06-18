@@ -1,75 +1,58 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Description: EC2 con pagina web - Examen Final
 
 Resources:
-
-  WebSecurityGroup:
+  ExamenSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Permitir HTTP
+      GroupDescription: Acceso HTTP puerto 80
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
 
-  WebServer:
+  ExamenEC2:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      ImageId: ami-0c02fb55956c7d316
-      # ✅ Corregido: SecurityGroupIds funciona en cualquier VPC
-      SecurityGroupIds:
-        - !Ref WebSecurityGroup
-
+      ImageId: ami-0c101f26f147fa7fd
+      SecurityGroups:
+        - !Ref ExamenSecurityGroup
       UserData:
-        Fn::Base64: !Sub |
+        Fn::Base64: |
           #!/bin/bash
           yum update -y
-          yum install httpd -y
+          yum install -y httpd
           systemctl start httpd
           systemctl enable httpd
-
-          cat <<EOF > /var/www/html/index.html
+          cat > /var/www/html/index.html << 'EOF'
           <!DOCTYPE html>
-          <html>
+          <html lang="es">
           <head>
-          <title>Examen Final</title>
-          <style>
-          body{
-            background:#f5f5f5;
-            text-align:center;
-            font-family:Arial;
-          }
-          h1{
-            color:#0077cc;
-          }
-          </style>
+            <meta charset="UTF-8">
+            <title>Examen Final</title>
+            <style>
+              body { font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+              .card { background: #16213e; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 0 30px rgba(0,150,255,0.3); }
+              h1 { color: #00b4d8; }
+              p { font-size: 1.2em; }
+            </style>
           </head>
           <body>
-
-          <h1>Yiceth Yuliana Velasquez Gomez</h1>
-          <h2>0192312</h2>
-
-          <p>Examen Final Arquitectura de Computadores</p>
-
-          <button onclick="mensaje()">Click</button>
-
-          <script>
-          function mensaje(){
-            alert("Hola Profesor Wilder");
-          }
-          </script>
-
+            <div class="card">
+              <h1>Examen Final Arquitectura de Computadores</h1>
+              <p><strong>Nombre:</strong> Yuliana Velasquez</p>
+              <p><strong>Código:</strong> 0192312</p>
+              <script>
+                console.log('Pagina cargada correctamente');
+              </script>
+            </div>
           </body>
           </html>
           EOF
 
-
 Outputs:
-  WebServerIP:
-    Description: IP publica del servidor web
-    Value: !GetAtt WebServer.PublicIp
-
-  WebServerURL:
-    Description: URL del servidor web
-    Value: !Sub "http://${WebServer.PublicIp}"
+  PublicIP:
+    Description: IP publica de la EC2
+    Value: !GetAtt ExamenEC2.PublicIp
